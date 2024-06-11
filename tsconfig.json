@@ -5,6 +5,8 @@
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "skipLibCheck": true,
+    // import되는 파일의 이름을 대소문자를 유지할건 지 선택하는 옵션
+    "forceConsistentCasingInFileNames": false,
 
     /* Bundler mode */
     "moduleResolution": "bundler",
