@@ -1,4 +1,4 @@
-import { Typography } from "@mui/material";
+import { Divider, Typography } from "@mui/material";
 import { memo, useCallback, useRef, useState } from "react";
 import { CalcButton } from "./CalcButton";
 import { CalcHistory } from "./CalcHistory";
@@ -11,9 +11,6 @@ const Calc = memo((() => {
     const [displayEquals, setDisplayEquals] = useState<boolean>(false);
     const [history, setHistory] = useState<CalaHistoryType>();
 
-    // const getDigitCount = useCallback((checkNumber: number): boolean => {
-    //     return Math.abs(checkNumber).toString().length < 7 ? true : false;
-    // }, []);
     const handleEventBackSpace = useCallback(() => {
         if (number !== 0) {
             setNumber(prevNumber => {
@@ -47,7 +44,6 @@ const Calc = memo((() => {
                 expression: tempExprssion,
                 result: tempResult
             };
-
             if (!displayEquals) {
                 switch (operation) {
                     case '+':
@@ -59,7 +55,7 @@ const Calc = memo((() => {
                         };
                         break;
 
-                    case '-':
+                    case '−':
                         tempResult = resultRef.current - number;
                         tempExprssion = `${resultRef.current} - ${number} =`;
                         tempHistory = {
@@ -93,7 +89,6 @@ const Calc = memo((() => {
             }
 
             if (inputOperation === '003D') {
-                console.log('input: =');
                 setDisplayEquals(true);
                 setNumber(resultRef.current);
                 setOperation('');
@@ -115,19 +110,19 @@ const Calc = memo((() => {
     return (
         <div className='flex flex-col items-center'>
             <div className='flex mt-10 w-10/12'>
-                <div className='flex-1initial w-80 mx-5'>
-                    <div className="grid w-full my-5">
-                        {!resultRef
+                <div className='flex-1initial w-80 mx-5 p-1 border-2 rounded-lg border-sky-400 bg-sky-200'>
+                    <div className="grid w-full my-4 rounded-lg border-2 bg-white">
+                        {!resultRef.current
                             ?
                             <>
-                                <Typography className='grid justify-end text-4xl'>{number}</Typography>
+                                <Typography className='grid justify-end text-4xl mt-5'>{number}</Typography>
                             </>
                             :
                             <>
                                 {displayEquals
                                     ?
                                     <div className="flex justify-end ">
-                                        <Typography className='text-sm mr-1'>{history.expression}</Typography>
+                                        <Typography className='text-sm mr-1'>{history?.expression}</Typography>
                                     </div>
                                     :
                                     <div className="flex justify-end ">
@@ -139,6 +134,7 @@ const Calc = memo((() => {
                             </>
                         }
                     </div>
+                    <Divider className="mb-1" />
                     <CalcButton
                         setNumber={handleSetNumber}
                         numberReset={handleEventAC}
@@ -148,7 +144,7 @@ const Calc = memo((() => {
                 </div>
                 <CalcHistory />
             </div>
-        </div>
+        </div >
     );
 }));
 
