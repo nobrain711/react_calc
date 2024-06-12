@@ -1,20 +1,27 @@
 import { Typography } from "@mui/material";
-import { memo, useCallback, useEffect, useState } from "react";
+import { memo, useCallback, useRef, useState } from "react";
 import { CalcButton } from "./CalcButton";
 import { CalcHistory } from "./CalcHistory";
 import { CalaHistoryType } from "./types/ObjectType";
 
 const Calc = memo((() => {
     const [number, setNumber] = useState<number>(0);
-    const [result, setResult] = useState<number>(0);
+    const resultRef = useRef<number>(0);
     const [operation, setOperation] = useState<string>('');
     const [displayEquals, setDisplayEquals] = useState<boolean>(false);
-    const [history, setHistory] = useState<CalaHistoryType>({});
-    const [histories, setHistories] = useState<CalaHistoryType[]>([]);
+    const [history, setHistory] = useState<CalaHistoryType>();
 
     // const getDigitCount = useCallback((checkNumber: number): boolean => {
     //     return Math.abs(checkNumber).toString().length < 7 ? true : false;
     // }, []);
+    const handleEventBackSpace = useCallback(() => {
+        if (number !== 0) {
+            setNumber(prevNumber => {
+                const tempNumber: number = parseInt(prevNumber.toString().slice(0, -1));
+                return !Number.isNaN(tempNumber) ? tempNumber : 0;
+            });
+        }
+    }, [number]);
 
     const handleEventAC = useCallback(() => {
         setNumber(0);
@@ -22,19 +29,16 @@ const Calc = memo((() => {
 
     const handleEventClear = useCallback(() => {
         setNumber(0);
-        setResult(0);
+        resultRef.current = 0;
         setOperation('');
+        setDisplayEquals(false);
     }, []);
 
     const handleSetOperation = useCallback((inputOperation: string) => {
-        if (result === 0) {
-            setResult(number);
+        if (resultRef.current === 0) {
+            resultRef.current += number;
             setNumber(0);
-
-            console.log('not input: =');
-            const unicodeString = `\\u${inputOperation}`;
-            const unicodeChar = JSON.parse(`"${unicodeString}"`);
-            setOperation(unicodeChar);
+            setOperation(String.fromCharCode(parseInt(inputOperation, 16)));
             setDisplayEquals(false);
         } else {
             let tempResult: number = 0;
@@ -44,67 +48,61 @@ const Calc = memo((() => {
                 result: tempResult
             };
 
-            switch (operation) {
-                case '+':
-                    console.log(`plus: ${result + number}`);
-                    tempResult = result + number;
-                    tempExprssion = `${result} + ${number} =`;
-                    tempHistory = {
-                        expression: tempExprssion,
-                        result: tempResult
-                    };
-                    break;
+            if (!displayEquals) {
+                switch (operation) {
+                    case '+':
+                        tempResult = resultRef.current + number;
+                        tempExprssion = `${resultRef.current} + ${number} =`;
+                        tempHistory = {
+                            expression: tempExprssion,
+                            result: tempResult
+                        };
+                        break;
 
-                case '-':
-                    console.log(`sub: ${operation}`);
-                    tempResult = result - number;
-                    tempExprssion = `${result} - ${number} =`;
-                    tempHistory = {
-                        expression: tempExprssion,
-                        result: tempResult
-                    };
-                    break;
+                    case '-':
+                        tempResult = resultRef.current - number;
+                        tempExprssion = `${resultRef.current} - ${number} =`;
+                        tempHistory = {
+                            expression: tempExprssion,
+                            result: tempResult
+                        };
+                        break;
 
-                case '×':
-                    console.log(`mul: ${result * number}`);
-                    tempResult = result * number;
-                    tempExprssion = `${result} × ${number} =`;
-                    tempHistory = {
-                        expression: tempExprssion,
-                        result: tempResult
-                    };
-                    break;
+                    case '×':
+                        tempResult = resultRef.current * number;
+                        tempExprssion = `${resultRef.current} × ${number} =`;
+                        tempHistory = {
+                            expression: tempExprssion,
+                            result: tempResult
+                        };
+                        break;
 
-                case '÷':
-                    console.log(`div: ${result / number}`);
-                    tempResult = result / number;
-                    tempExprssion = `${result} ÷ ${number} =`;
-                    tempHistory = {
-                        expression: tempExprssion,
-                        result: tempResult
-                    };
-                    break;
+                    case '÷':
+                        tempResult = resultRef.current / number;
+                        tempExprssion = `${resultRef.current} ÷ ${number} =`;
+                        tempHistory = {
+                            expression: tempExprssion,
+                            result: tempResult
+                        };
+                        break;
+                }
+                resultRef.current = tempResult;
+                setHistory(tempHistory);
+            } else {
+                setNumber(0);
             }
-            console.log(tempResult);
-            setResult(tempResult);
-            setHistory(tempHistory);
-            console.log(result);
 
             if (inputOperation === '003D') {
                 console.log('input: =');
                 setDisplayEquals(true);
-                setNumber(result);
+                setNumber(resultRef.current);
                 setOperation('');
-                console.log(number);
             } else {
-                console.log('not input: =');
-                const unicodeString = `\\u${inputOperation}`;
-                const unicodeChar = JSON.parse(`"${unicodeString}"`);
-                setOperation(unicodeChar);
+                setOperation(String.fromCharCode(parseInt(inputOperation, 16)));
                 setDisplayEquals(false);
             }
         }
-    }, [number, operation, result])
+    }, [displayEquals, number, operation])
 
     const handleSetNumber = useCallback((inputNumber: number): void => {
         if (number) {
@@ -119,7 +117,7 @@ const Calc = memo((() => {
             <div className='flex mt-10 w-10/12'>
                 <div className='flex-1initial w-80 mx-5'>
                     <div className="grid w-full my-5">
-                        {!result
+                        {!resultRef
                             ?
                             <>
                                 <Typography className='grid justify-end text-4xl'>{number}</Typography>
@@ -133,7 +131,7 @@ const Calc = memo((() => {
                                     </div>
                                     :
                                     <div className="flex justify-end ">
-                                        <Typography className='text-sm mr-1'>{result}</Typography>
+                                        <Typography className='text-sm mr-1'>{resultRef.current}</Typography>
                                         <Typography className='text-sm mr-1'>{operation}</Typography>
                                     </div>
                                 }
@@ -145,7 +143,8 @@ const Calc = memo((() => {
                         setNumber={handleSetNumber}
                         numberReset={handleEventAC}
                         setOperation={handleSetOperation}
-                        setClear={handleEventClear} />
+                        setClear={handleEventClear}
+                        numberBackSpace={handleEventBackSpace} />
                 </div>
                 <CalcHistory />
             </div>
