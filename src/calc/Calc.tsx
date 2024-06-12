@@ -1,12 +1,16 @@
 import { Typography } from "@mui/material";
-import { memo, useCallback, useState } from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 import { CalcButton } from "./CalcButton";
 import { CalcHistory } from "./CalcHistory";
+import { CalaHistoryType } from "./types/ObjectType";
 
 const Calc = memo((() => {
     const [number, setNumber] = useState<number>(0);
-    const [currentNumber, setCurrentNumber] = useState<number[]>([]);
+    const [result, setResult] = useState<number>(0);
     const [operation, setOperation] = useState<string>('');
+    const [displayEquals, setDisplayEquals] = useState<boolean>(false);
+    const [history, setHistory] = useState<CalaHistoryType>({});
+    const [histories, setHistories] = useState<CalaHistoryType[]>([]);
 
     // const getDigitCount = useCallback((checkNumber: number): boolean => {
     //     return Math.abs(checkNumber).toString().length < 7 ? true : false;
@@ -18,33 +22,89 @@ const Calc = memo((() => {
 
     const handleEventClear = useCallback(() => {
         setNumber(0);
-        setCurrentNumber([]);
-        setOperation([]);
-    }, [])
+        setResult(0);
+        setOperation('');
+    }, []);
 
     const handleSetOperation = useCallback((inputOperation: string) => {
-        setCurrentNumber((currentNumber) => [...currentNumber, number]);
-        setNumber(0);
+        if (result === 0) {
+            setResult(number);
+            setNumber(0);
 
-        let tempOperation: string = '';
+            console.log('not input: =');
+            const unicodeString = `\\u${inputOperation}`;
+            const unicodeChar = JSON.parse(`"${unicodeString}"`);
+            setOperation(unicodeChar);
+            setDisplayEquals(false);
+        } else {
+            let tempResult: number = 0;
+            let tempExprssion: string = '';
+            let tempHistory: CalaHistoryType = {
+                expression: tempExprssion,
+                result: tempResult
+            };
 
-        switch (inputOperation) {
-            case '+':
-                tempOperation = '+';
-                break;
-            case '-':
-                tempOperation = '-';
-                break;
-            case '*':
-                tempOperation = '*';
-                break;
-            case '/':
-                tempOperation = '/';
-                break
+            switch (operation) {
+                case '+':
+                    console.log(`plus: ${result + number}`);
+                    tempResult = result + number;
+                    tempExprssion = `${result} + ${number} =`;
+                    tempHistory = {
+                        expression: tempExprssion,
+                        result: tempResult
+                    };
+                    break;
+
+                case '-':
+                    console.log(`sub: ${operation}`);
+                    tempResult = result - number;
+                    tempExprssion = `${result} - ${number} =`;
+                    tempHistory = {
+                        expression: tempExprssion,
+                        result: tempResult
+                    };
+                    break;
+
+                case '×':
+                    console.log(`mul: ${result * number}`);
+                    tempResult = result * number;
+                    tempExprssion = `${result} × ${number} =`;
+                    tempHistory = {
+                        expression: tempExprssion,
+                        result: tempResult
+                    };
+                    break;
+
+                case '÷':
+                    console.log(`div: ${result / number}`);
+                    tempResult = result / number;
+                    tempExprssion = `${result} ÷ ${number} =`;
+                    tempHistory = {
+                        expression: tempExprssion,
+                        result: tempResult
+                    };
+                    break;
+            }
+            console.log(tempResult);
+            setResult(tempResult);
+            setHistory(tempHistory);
+            console.log(result);
+
+            if (inputOperation === '003D') {
+                console.log('input: =');
+                setDisplayEquals(true);
+                setNumber(result);
+                setOperation('');
+                console.log(number);
+            } else {
+                console.log('not input: =');
+                const unicodeString = `\\u${inputOperation}`;
+                const unicodeChar = JSON.parse(`"${unicodeString}"`);
+                setOperation(unicodeChar);
+                setDisplayEquals(false);
+            }
         }
-
-        setOperation(tempOperation)
-    }, [number]);
+    }, [number, operation, result])
 
     const handleSetNumber = useCallback((inputNumber: number): void => {
         if (number) {
@@ -59,22 +119,24 @@ const Calc = memo((() => {
             <div className='flex mt-10 w-10/12'>
                 <div className='flex-1initial w-80 mx-5'>
                     <div className="grid w-full my-5">
-                        {!currentNumber
+                        {!result
                             ?
                             <>
-                                <div className="flex justify-end">
-                                    {console.log(...currentNumber)}
-                                    <Typography className='grid text-sm ml-1'>{currentNumber}</Typography>
-                                    <Typography className='grid text-sm ml-1'>{operation}</Typography>
-                                </div>
                                 <Typography className='grid justify-end text-4xl'>{number}</Typography>
                             </>
                             :
                             <>
-                                <div className="flex justify-end ">
-                                    <Typography className='grid text-sm mr-1'>{currentNumber}</Typography>
-                                    <Typography className='grid text-sm mr-1'>{operation}</Typography>
-                                </div>
+                                {displayEquals
+                                    ?
+                                    <div className="flex justify-end ">
+                                        <Typography className='text-sm mr-1'>{history.expression}</Typography>
+                                    </div>
+                                    :
+                                    <div className="flex justify-end ">
+                                        <Typography className='text-sm mr-1'>{result}</Typography>
+                                        <Typography className='text-sm mr-1'>{operation}</Typography>
+                                    </div>
+                                }
                                 <Typography className='grid justify-end text-4xl'>{number}</Typography>
                             </>
                         }
