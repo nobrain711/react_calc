@@ -2,7 +2,7 @@ import { Divider, Typography } from "@mui/material";
 import { memo, useCallback, useRef, useState } from "react";
 import { CalcButton } from "./CalcButton";
 import { CalcHistory } from "./CalcHistory";
-import { CalaHistoryType } from "./types/ObjectType";
+import { CalaHistoryType } from "./types/objectType";
 
 const Calc = memo((() => {
     const [number, setNumber] = useState<number>(0);

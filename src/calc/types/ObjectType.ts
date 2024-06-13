@@ -10,7 +10,12 @@ export interface result {
 }
 
 export interface calc {
-  number: number;
-  operation: string;
+  currentNumber: number;
+  currentOperation: string;
   result: result;
+}
+
+export interface history {
+  expression: string;
+  result: number;
 }

@@ -1,6 +1,6 @@
 import Button from "@mui/material/Button"
 import { FC } from "react"
-import { handleClear, handleEventBackSpace, handleResetNumber, handleSetNumber, handleSetOperation } from "./types/FunctionType";
+import { handleClear, handleEventBackSpace, handleResetNumber, handleSetNumber, handleSetOperation } from "./types/functionType";
 
 interface CalcButtonProps {
     setNumber: handleSetNumber;
